@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>FUTURE GAUGE</title>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="https://via.placeholder.com/192/050505/00d2ff?text=FG">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@800;900&family=Rajdhani:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#050505;color:#fff;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;user-select:none;-webkit-user-select:none}
+body{overflow:hidden}
+
+#app{
+  height:100%;
+  position:relative;
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  transition:filter .5s;
+}
+
+.shade{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(5,15,25,.25),rgba(2,10,20,.85));
+  transition:opacity .4s ease;
+}
+
+.content{
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:24px 18px calc(18px + env(safe-area-inset-bottom));
+  transition:opacity .4s ease, transform .4s ease;
+}
+
+body.ui-hidden .shade,
+body.ui-hidden .content{
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+#restoreTapArea{
+  position:fixed;
+  inset:0;
+  z-index:99;
+  display:none;
+}
+body.ui-hidden #restoreTapArea{
+  display:block;
+}
+
+.top{text-align:center;text-shadow:0 2px 12px #000;position:relative}
+.title{font-family:'Orbitron',sans-serif;font-size:15px;letter-spacing:.32em;font-weight:900;color:#fff;text-shadow:0 0 10px #00d2ff, 0 0 20px #00a2ff}
+.stage{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;letter-spacing:.18em;margin-top:6px;color:#00e5ff;text-shadow:0 0 12px rgba(0,229,255,0.8)}
+
+.toggle-ui-btn{
+  position:absolute;
+  top:0;
+  right:0;
+  background:rgba(0,10,20,.6);
+  border:1px solid rgba(0,210,255,.5);
+  color:#fff;
+  border-radius:20px;
+  padding:6px 12px;
+  font-size:12px;
+  font-weight:900;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  cursor:pointer;
+  box-shadow:0 0 10px rgba(0,210,255,0.3);
+}
+
+.center{text-align:center;text-shadow:0 2px 12px #000}
+.hour-num{font-family:'Orbitron',sans-serif;font-size:52px;font-weight:900;line-height:1;letter-spacing:.02em;text-shadow:0 0 20px rgba(255,255,255,0.6), 0 0 15px #00d2ff}
+.hour-unit{font-size:18px;margin-left:4px;font-weight:800;color:#d0f0ff}
+.sub-info{margin-top:10px;font-size:14px;opacity:.95;display:flex;justify-content:center;gap:12px;font-weight:800;letter-spacing:.05em}
+
+.gauge-box{
+  margin-top:18px;
+  background:rgba(5,15,30,.75);
+  border:2px solid rgba(0,212,255,.5);
+  border-radius:999px;
+  padding:4px;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 0 20px rgba(0,212,255,.3), inset 0 0 10px rgba(0,0,0,.9);
+}
+.gauge-bar{
+  height:18px;
+  border-radius:999px;
+  background:linear-gradient(90deg, #0055ff, #00d2ff, #80f0ff);
+  width:0%;
+  transition:width .4s ease,box-shadow .4s ease;
+  box-shadow:0 0 16px #00d2ff, 0 0 30px #0088ff;
+}
+.next-info{margin-top:10px;font-size:13px;opacity:.9;letter-spacing:.08em;font-weight:700;color:#c0f0ff}
+
+.bottom{display:flex;flex-direction:column;gap:12px}
+.status{text-align:center;font-size:14px;min-height:20px;opacity:.95;font-weight:800;text-shadow:0 2px 10px #000, 0 0 10px rgba(0,212,255,0.5)}
+.btn-grid{display:grid;grid-template-columns:1fr;gap:10px}
+
+button{
+  border:none;
+  border-radius:12px;
+  padding:18px;
+  font-family:'Orbitron','Rajdhani',sans-serif;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.15em;
+  color:#fff;
+  background:rgba(10, 20, 35, 0.85);
+  border:2px solid rgba(0, 212, 255, 0.3);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  cursor:pointer;
+  transition:all .2s ease;
+  position:relative;
+  overflow:hidden;
+  text-transform:uppercase;
+}
+
+button:active{
+  transform:scale(.97);
+}
+
+button.primary{
+  background:linear-gradient(135deg, #0052d4 0%, #4364f7 50%, #6fb1fc 100%);
+  border:2px solid #80f0ff;
+  color:#fff;
+  text-shadow:0 0 10px #ffffff, 0 0 20px #00d2ff;
+  box-shadow:0 0 20px rgba(0, 212, 255, 0.8), 0 0 40px rgba(0, 150, 255, 0.5), inset 0 0 15px rgba(200, 245, 255, 0.7);
+}
+
+button.secondary{
+  background:rgba(5, 15, 25, 0.85);
+  border:2px solid #00d2ff;
+  color:#80e5ff;
+  text-shadow:0 0 8px rgba(0, 212, 255, 0.8);
+  box-shadow:0 0 12px rgba(0, 212, 255, 0.4), inset 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+.ai-modal{
+  position:fixed;
+  inset:0;
+  z-index:30;
+  background:rgba(2,10,20,.88);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:24px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s ease;
+}
+.ai-modal.show{opacity:1;pointer-events:auto}
+
+.ai-card{
+  width:100%;
+  max-width:340px;
+  background:rgba(8, 25, 45, 0.92);
+  border:2px solid #00d2ff;
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 0 35px rgba(0, 212, 255, 0.5), inset 0 0 20px rgba(0, 212, 255, 0.2);
+  text-align:center;
+  position:relative;
+}
+
+.ai-header{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-family:'Orbitron',sans-serif;
+  font-size:13px;
+  font-weight:900;
+  color:#80f0ff;
+  letter-spacing:.15em;
+  margin-bottom:12px;
+  text-shadow:0 0 10px #00d2ff;
+}
+
+.ai-badge{
+  background:#00d2ff;
+  color:#000;
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:4px;
+  font-weight:900;
+}
+
+.ai-rank{
+  font-family:'Orbitron',sans-serif;
+  font-size:18px;
+  font-weight:900;
+  color:#ffe600;
+  text-shadow:0 0 12px rgba(255, 230, 0, 0.8);
+  margin-bottom:8px;
+  letter-spacing:.1em;
+}
+
+.ai-bonus{
+  font-size:12px;
+  font-weight:800;
+  color:#00ffcc;
+  text-shadow:0 0 8px #00ffcc;
+  margin-bottom:12px;
+  letter-spacing:.05em;
+}
+
+.ai-message{
+  font-size:15px;
+  line-height:1.65;
+  color:#fff;
+  margin-bottom:22px;
+  font-weight:700;
+  text-shadow:0 1px 4px #000;
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.timer-modal{position:fixed;inset:0;z-index:10;background:rgba(2,10,20,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.timer-modal.show{opacity:1;pointer-events:auto}
+.timer-title{font-family:'Orbitron',sans-serif;font-size:15px;letter-spacing:.25em;color:#00e5ff;margin-bottom:20px;text-shadow:0 0 12px #00d2ff}
+.timer-display{font-family:'Rajdhani',sans-serif;font-size:72px;font-weight:900;letter-spacing:.05em;text-shadow:0 0 20px #00d2ff, 0 0 50px rgba(0,212,255,.6);margin-bottom:40px}
+.timer-btn-group{width:100%;max-width:320px;display:flex;flex-direction:column;gap:14px}
+
+.complete-overlay{position:fixed;inset:0;z-index:20;background:#020a14;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;opacity:0;pointer-events:none;transition:opacity .8s}
+.complete-overlay.show{opacity:1;pointer-events:auto}
+.comp-title{font-family:'Orbitron',sans-serif;font-size:32px;font-weight:900;color:#00e5ff;text-shadow:0 0 30px #00d2ff;margin-bottom:12px}
+.comp-sub{font-size:18px;margin-bottom:32px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div id="restoreTapArea" title="タップでUIを復帰"></div>
+
+<div id="app">
+  <div class="shade"></div>
+  <div class="content">
+    <div class="top">
+      <div class="title">FUTURE GAUGE</div>
+      <div class="stage" id="stage">START</div>
+      <button class="toggle-ui-btn" id="hideUiBtn">👁️ UI非表示</button>
+    </div>
+
+    <div class="center">
+      <div>
+        <span class="hour-num" id="totalHours">0.0</span>
+        <span class="hour-unit">/ 1000h</span>
+      </div>
+      <div class="sub-info">
+        <span>進捗: <span id="percent">0.0</span>%</span>
+        <span>|</span>
+        <span>今日: <span id="today">0.0</span>h</span>
+      </div>
+      <div class="gauge-box">
+        <div class="gauge-bar" id="gaugeBar"></div>
+      </div>
+      <div class="next-info" id="next">次のステージまで 100.0 時間</div>
+    </div>
+
+    <div class="bottom">
+      <div class="status" id="status">未来の自分へ、カウントアップ。</div>
+      <div class="btn-grid">
+        <button class="primary" id="mainBtn">勉強開始</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ai-modal" id="aiModal">
+  <div class="ai-card">
+    <div class="ai-header">
+      <span class="ai-badge">GEMINI AI</span>
+      <span>SYSTEM EVALUATION</span>
+    </div>
+    <div class="ai-rank" id="aiRankText">RANK: S</div>
+    <div class="ai-bonus" id="aiBonusText">✨ LUCKY BONUS ACTIVE!</div>
+    <div class="ai-message" id="aiMsgText">お疲れ様！</div>
+    <button class="primary" id="aiCloseBtn">受け取る</button>
+  </div>
+</div>
+
+<div class="timer-modal" id="timerModal">
+  <div class="timer-title">SESSION IN PROGRESS</div>
+  <div class="timer-display" id="timerDisplay">00:00:00</div>
+  <div class="timer-btn-group">
+    <button class="primary" id="pauseBtn">一時停止</button>
+    <button class="secondary" id="hideBtn">タイマーを隠す</button>
+    <button class="secondary" id="finishBtn" style="color:#ff6666; border-color:#ff3333; text-shadow:0 0 10px #ff3333;">記録して終了</button>
+  </div>
+</div>
+
+<div class="complete-overlay" id="complete">
+  <div class="comp-title">FUTURE UNLOCKED</div>
+  <div class="comp-sub">1000時間、積み上げた。<br>最高の未来へ。</div>
+  <button class="primary" onclick="document.getElementById('complete').classList.remove('show')">未来を確かめる</button>
+</div>
+
+<script>
+// Service Worker 登録
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('SW Registered!', reg);
+    }).catch(err => {
+      console.log('SW Register Failed:', err);
+    });
+  });
+}
+
+const GOAL = 3600000;
+const STAGES = [
+  { limit: 0, name: "START" },
+  { limit: 360000, name: "LEVEL 1" },
+  { limit: 900000, name: "LEVEL 2" },
+  { limit: 1800000, name: "HALF WAY" },
+  { limit: 2700000, name: "LEVEL 4" },
+  { limit: 3600000, name: "FUTURE UNLOCKED" }
+];
+
+const AI_RANKS = [
+  {
+    maxSec: 600,
+    rank: "RANK C : FIRST STEP",
+    messages: [
+      "ナイススタート！まずは机に向かって画面を開いたこと自体が素晴らしい一歩だよ！",
+      "小さく始めて大きく育てる！この数分間がすべての偉業の始まり！",
+      "スタートを切れたね！エンジンは温まった、この積み重ねが未来を作る！",
+      "よし、一歩前進！この「ちょっとやった」の蓄積が未来で大きな差になるんだ！",
+      "素晴らしい立ち上がり！重い腰を上げて行動した自分を褒めてあげてね！"
+    ]
+  },
+  {
+    maxSec: 1800,
+    rank: "RANK B : SOLID FOCUS",
+    messages: [
+      "いい集中力だね！しっかり自分のペースを掴んで勉強に向き合えているよ！",
+      "確実に知識が血肉になってる！この着実な前進がすごくかっこいい！",
+      "30分近くの集中、素晴らしい！この積み重ねが大きな自信につながるよ！",
+      "グッドセッション！ブレずに自分の目標と向き合う姿、本当に素敵だよ！",
+      "集中モード入ってたね！着実にレベルアップしてるのが数字にも表れてるよ！"
+    ]
+  },
+  {
+    maxSec: 3600,
+    rank: "RANK A : HIGH PERFORMANCE",
+    messages: [
+      "素晴らしい集中力！1時間近くブレずにやり抜くなんて本当にすごい！",
+      "ゾーンに入ってるね！努力を当たり前にこなすあなたの姿勢、尊敬するよ！",
+      "見事な成果だ！集中を切らさずここまで走り切った自分を誇っていいよ！",
+      "ナイスハイパフォーマンス！積み重ねた時間の重みが未来の力になる！",
+      "素晴らしい粘り強さ！思考が研ぎ澄まされて最高のセッションになったね！"
+    ]
+  },
+  {
+    maxSec: 7200,
+    rank: "RANK S : SUPER HUMAN",
+    messages: [
+      "凄まじい集中力…！1時間を軽く超えて高みへ到達したね！圧倒的だよ！",
+      "神がかった集中セッション！ここまでストイックに打ち込めるのは才能であり努力の証！",
+      "圧巻の積み上げ！未来の自分が感動して感謝しているのが目に見えるよ！",
+      "限界突破のゾーン状態！周囲の雑音を吹き飛ばす圧倒的な熱量だね！",
+      "最高峰のパフォーマンス！ここまでの集中を維持できる人はそういないよ！"
+    ]
+  },
+  {
+    maxSec: Infinity,
+    rank: "RANK SS : LEGENDARY FOCUS",
+    messages: [
+      "【伝説級の集中力】言葉が出ないほどの圧倒的成果！限界を超えて進化し続けているね！",
+      "【ゾーン極致】2時間以上の猛烈な打ち込み！あなたの覚悟と継続力はまさに本物だ！",
+      "【未来開拓者】凄まじい熱量…！ここまでの努力を重ねられる人は一握り。最高の時間をありがとう！",
+      "【神域の領域】まさに集中力の鬼…！この壮大な積み上げが未来を大きく引き寄せる！",
+      "【完全覚醒】圧倒的な集中セッション完遂！今日という日はあなたの努力の歴史に刻まれた！"
+    ]
+  }
+];
+
+const LUCKY_CRITICAL_MESSAGES = [
+  "🎯【クリティカル発生！】集中力が研ぎ澄まされ、脳の吸収率が爆発的に向上中！",
+  "⚡【ラッキーバフ発動！】今日のあなたの努力値は通常の2倍の価値があるよ！",
+  "✨【超集中フィーバー！】素晴らしい運と実力！最高の学習効率を達成したね！"
+];
+
+let total = parseInt(localStorage.getItem("fg_total_sec") || "0", 10);
+let today = parseInt(localStorage.getItem("fg_today_sec") || "0", 10);
+let lastDate = localStorage.getItem("fg_last_date") || "";
+
+const todayStr = new Date().toLocaleDateString();
+if (lastDate !== todayStr) {
+  today = 0;
+  localStorage.setItem("fg_today_sec", "0");
+  localStorage.setItem("fg_last_date", todayStr);
+}
+
+let running = false;
+let isPaused = false;
+let startedAt = 0;
+let elapsed = 0;
+let pausedElapsed = 0;
+let tickId = null;
+
+const $ = id => document.getElementById(id);
+
+$("hideUiBtn").onclick = (e) => {
+  e.stopPropagation();
+  document.body.classList.add("ui-hidden");
+};
+
+$("restoreTapArea").onclick = () => {
+  document.body.classList.remove("ui-hidden");
+};
+
+function formatTimer(sec) {
+  const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+  const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+function getStageName(sec) {
+  let current = STAGES[0].name;
+  for (let s of STAGES) {
+    if (sec >= s.limit) current = s.name;
+  }
+  return current;
+}
+
+function getNextStageText(sec) {
+  if (sec >= GOAL) return "🏆 1000時間達成！";
+  for (let s of STAGES) {
+    if (sec < s.limit) {
+      const leftH = ((s.limit - sec) / 3600).toFixed(1);
+      return `次の【${s.name}】まで ${leftH} 時間`;
+    }
+  }
+  return "";
+}
+
+function showAiEvaluation(sec) {
+  let matchedRank = AI_RANKS[AI_RANKS.length - 1];
+  for (let r of AI_RANKS) {
+    if (sec < r.maxSec) {
+      matchedRank = r;
+      break;
+    }
+  }
+
+  const isCritical = Math.random() < 0.20;
+
+  let msg = "";
+  if (isCritical) {
+    const critIdx = Math.floor(Math.random() * LUCKY_CRITICAL_MESSAGES.length);
+    msg = LUCKY_CRITICAL_MESSAGES[critIdx];
+    $("aiBonusText").style.display = "block";
+    $("aiBonusText").textContent = "🔥 LUCKY CRITICAL HIT! (20% CHANCE)";
+  } else {
+    const idx = Math.floor(Math.random() * matchedRank.messages.length);
+    msg = matchedRank.messages[idx];
+    $("aiBonusText").style.display = "none";
+  }
+
+  $("aiRankText").textContent = matchedRank.rank;
+  $("aiMsgText").textContent = msg;
+  $("aiModal").classList.add("show");
+}
+
+$("aiCloseBtn").onclick = () => {
+  $("aiModal").classList.remove("show");
+  if (total >= GOAL) {
+    $("complete").classList.add("show");
+  }
+};
+
+function render() {
+  const totalH = (total / 3600).toFixed(1);
+  const todayH = (today / 3600).toFixed(1);
+  const pct = Math.min(100, (total / GOAL) * 100).toFixed(1);
+
+  $("totalHours").textContent = totalH;
+  $("percent").textContent = pct;
+  $("today").textContent = todayH;
+  $("gaugeBar").style.width = pct + "%";
+  $("stage").textContent = getStageName(total);
+  $("next").textContent = getNextStageText(total);
+
+  $("timerDisplay").textContent = formatTimer(elapsed);
+
+  if (running) {
+    $("mainBtn").textContent = "タイマーを見る";
+    $("status").textContent = isPaused ? "一時停止中..." : "集中中... 未来を積み上げている。";
+  } else {
+    $("mainBtn").textContent = "勉強開始";
+    $("status").textContent = total >= GOAL ? "1000時間達成済み！" : "未来の自分へ、カウントアップ。";
+  }
+}
+
+function tick() {
+  if (running && !isPaused) {
+    elapsed = pausedElapsed + Math.floor((Date.now() - startedAt) / 1000);
+    render();
+  }
+}
+
+function start() {
+  if (!running) {
+    running = true;
+    isPaused = false;
+    startedAt = Date.now();
+    clearInterval(tickId);
+    tickId = setInterval(tick, 250);
+  }
+  $("timerModal").classList.add("show");
+  render();
+}
+
+function togglePause() {
+  if (!running) return;
+  if (!isPaused) {
+    isPaused = true;
+    pausedElapsed = elapsed;
+    $("pauseBtn").textContent = "再開";
+  } else {
+    isPaused = false;
+    startedAt = Date.now();
+    $("pauseBtn").textContent = "一時停止";
+  }
+  render();
+}
+
+function finish() {
+  if (elapsed <= 0 && !running) return;
+
+  if (running && !isPaused) {
+    elapsed = pausedElapsed + Math.floor((Date.now() - startedAt) / 1000);
+  }
+
+  const sessionSec = elapsed;
+
+  total += elapsed;
+  today += elapsed;
+
+  localStorage.setItem("fg_total_sec", total);
+  localStorage.setItem("fg_today_sec", today);
+
+  running = false;
+  isPaused = false;
+  clearInterval(tickId);
+  elapsed = 0;
+  pausedElapsed = 0;
+
+  $("pauseBtn").textContent = "一時停止";
+  $("timerModal").classList.remove("show");
+
+  render();
+
+  showAiEvaluation(sessionSec);
+
+  if (navigator.vibrate) {
+    navigator.vibrate([150, 80, 150]);
+  }
+}
+
+$("mainBtn").onclick = start;
+$("hideBtn").onclick = () => $("timerModal").classList.remove("show");
+$("pauseBtn").onclick = togglePause;
+$("finishBtn").onclick = finish;
+
+render();
+</script>
+</body>
+</html>
