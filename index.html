@@ -602,21 +602,26 @@ $("finishBtn").onclick = finish;
 render();
 </script>
 <script>
-function enterFullscreen() {
-  const el = document.documentElement;
+const fullscreenBtn = document.getElementById("fullscreenBtn");
 
-  if (el.requestFullscreen) {
-    el.requestFullscreen().catch(() => {});
-  } else if (el.webkitRequestFullscreen) {
-    el.webkitRequestFullscreen();
+fullscreenBtn.addEventListener("click", async () => {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+      fullscreenBtn.textContent = "⛶ 全画面解除";
+    } else {
+      await document.exitFullscreen();
+      fullscreenBtn.textContent = "⛶ 全画面";
+    }
+  } catch (error) {
+    console.log("Fullscreen:", error);
   }
-}
+});
 
-document.addEventListener("click", () => {
-  if (!document.fullscreenElement) {
-    enterFullscreen();
-  }
-}, { once: true });
+document.addEventListener("fullscreenchange", () => {
+  fullscreenBtn.textContent =
+    document.fullscreenElement ? "⛶ 全画面解除" : "⛶ 全画面";
+});
 </script>
 
 </body>
