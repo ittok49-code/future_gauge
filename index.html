@@ -586,5 +586,25 @@ $("finishBtn").onclick = finish;
 
 render();
 </script>
+<script>
+function enterFullscreen() {
+  const el = document.documentElement;
+
+  if (el.requestFullscreen) {
+    el.requestFullscreen().catch(() => {});
+  } else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen();
+  }
+}
+
+document.addEventListener("click", () => {
+  if (!document.fullscreenElement) {
+    enterFullscreen();
+  }
+}, { once: true });
+</script>
+
+</body>
+</html>
 </body>
 </html>
