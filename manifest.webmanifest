@@ -7,5 +7,13 @@
   "background_color": "#050505",
   "theme_color": "#050505",
   "lang": "ja",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./3ccf33c0-6aec-4f70-a472-8058c17c492b~3.jpg",
+      "sizes": "4096x4092",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
 }
