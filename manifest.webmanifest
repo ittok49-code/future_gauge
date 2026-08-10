@@ -2,23 +2,10 @@
   "name": "FUTURE GAUGE",
   "short_name": "FUTURE GAUGE",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
   "lang": "ja",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "https://via.placeholder.com/192/050505/00d2ff?text=FG",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://via.placeholder.com/512/050505/00d2ff?text=FG",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+  "orientation": "portrait"
 }
