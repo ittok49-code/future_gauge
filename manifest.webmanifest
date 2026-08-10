@@ -10,10 +10,16 @@
   "orientation": "portrait",
   "icons": [
     {
+      "src": "./454.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
       "src": "./8a336e68-6353-4afd-9de8-35efdb76d6bd%20-1_all_751%20%281%29.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
