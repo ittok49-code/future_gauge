@@ -2,6 +2,7 @@ const CACHE_NAME = 'future-gauge-v1';
 const ASSETS = [
   './index.html',
   './manifest.webmanifest'
+  './431~2.jpg'
 ];
 
 self.addEventListener('install', (event) => {
